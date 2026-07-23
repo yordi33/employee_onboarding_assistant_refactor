@@ -25,16 +25,24 @@ from pathlib import Path
 from statistics import mean
 
 from benchmark import FilaBenchmark
-from config import BENCHMARK_MODELS, OUTPUT_DIR, TEMPERATURE
+from config import (
+    BENCHMARK_MODELS, 
+    OUTPUT_DIR, 
+    TEMPERATURE,
+    DATETIME_FORMAT_STAMP,
+    PREFIX_BENCHMARK_CSV,
+    PREFIX_REPORT_MD,
+    LABEL_NOT_AVAILABLE
+)
 
 
 def _stamp() -> str:
-    return datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    return datetime.now(timezone.utc).strftime(DATETIME_FORMAT_STAMP)
 
 
 def guardar_csv(filas: list[FilaBenchmark]) -> Path:
     OUTPUT_DIR.mkdir(exist_ok=True)
-    path = OUTPUT_DIR / f"benchmark_{_stamp()}.csv"
+    path = OUTPUT_DIR / f"{PREFIX_BENCHMARK_CSV}{_stamp()}.csv"
     if not filas:
         path.write_text("", encoding="utf-8")
         return path
@@ -78,7 +86,7 @@ def _resumen_por_modelo(filas: list[FilaBenchmark]) -> dict[str, dict[str, float
 
 def generar_reporte_md(filas: list[FilaBenchmark], csv_path: Path) -> Path:
     OUTPUT_DIR.mkdir(exist_ok=True)
-    path = OUTPUT_DIR / f"report_{_stamp()}.md"
+    path = OUTPUT_DIR / f"{PREFIX_REPORT_MD}{_stamp()}.md"
     resumen = _resumen_por_modelo(filas)
     errores = [f for f in filas if f.error]
     total_tokens_todas_filas = sum(f.total_tokens or 0 for f in filas if not f.error)
@@ -100,7 +108,7 @@ def generar_reporte_md(filas: list[FilaBenchmark], csv_path: Path) -> Path:
 
     for modelo in BENCHMARK_MODELS:
         r = resumen[modelo]
-        pct = "N/A" if r["json_valido_pct"] < 0 else f"{r['json_valido_pct']:.0f}%"
+        pct = LABEL_NOT_AVAILABLE if r["json_valido_pct"] < 0 else f"{r['json_valido_pct']:.0f}%"
         lineas.append(
             f"| {modelo} | {int(r['runs_ok'])} | {r['elapsed_ms_media']:.0f} | "
             f"{r['output_tokens_media']:.1f} | {r['total_tokens_medio']:.1f} | {pct} |"

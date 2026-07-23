@@ -23,69 +23,28 @@ import config
 import re
 
 #---------------------------------------------------------------------------------------------------------------
-# Mensajes de rechazo
+# Mensajes de rechazo (Cargados desde config.py)
 #---------------------------------------------------------------------------------------------------------------
 
-MSG_VACIO = "No he recibido ninguna pregunta. Escríbeme algo sobre tu proceso de onboarding y te ayudo."
- 
+MSG_VACIO = config.MSG_VACIO
+
 MSG_DEMASIADO_LARGO = (
     "Tu mensaje es demasiado largo para procesarlo (máx. "
     f"{config.MAX_INPUT_CHARS} caracteres). ¿Puedes resumir tu pregunta?"
 )
- 
-MSG_ENTRADA_SOSPECHOSA = (
-    "No puedo procesar esa solicitud. Si tienes una pregunta sobre tu "
-    "onboarding en Bridge SA, reformúlala y con gusto te ayudo."
-)
- 
-MSG_DATO_SENSIBLE = (
-    "No gestiono información sobre salario o bonus (propio o de terceros) "
-    "por este canal. Coméntalo directamente con tu manager o con People "
-    "en vuestra 1:1."
-)
- 
-MSG_FUERA_DE_DOMINIO = (
-    "Este canal es exclusivamente para el onboarding de empleados de Bridge "
-    "SA. No puedo ayudar con contenido de programas formativos externos ni "
-    "con logística de clientes/cohortes; si es sobre tu propio onboarding, "
-    "pregúntame de nuevo con ese contexto."
-)
- 
-MSG_DIA_INVALIDO = "El día de onboarding debe ser un número entre 1 y 5."
+
+MSG_ENTRADA_SOSPECHOSA = config.MSG_ENTRADA_SOSPECHOSA
+MSG_DATO_SENSIBLE = config.MSG_DATO_SENSIBLE
+MSG_FUERA_DE_DOMINIO = config.MSG_FUERA_DE_DOMINIO
+MSG_DIA_INVALIDO = config.MSG_DIA_INVALIDO
 
 
 #---------------------------------------------------------------------------------------------------------------
-# Patrones de datos sensibles
+# Patrones de datos sensibles (Cargados desde config.py)
 #---------------------------------------------------------------------------------------------------------------
 
-
-PATRONES_DATOS_SENSIBLES = (
-    "salario",
-    "sueldo",
-    "nómina",
-    "nomina",
-    "bonus",
-    "bonificación",
-    "bonificacion",
-    "cuánto cobra",
-    "cuanto cobra",
-    "cuánto gano",
-    "cuanto gano",
-    "cuánto cobro",
-    "cuanto cobro",
-    "cuánto gana",
-    "cuanto gana",
-)
-
-PATRONES_PROGRAMA_EXTERNO = (
-    "programa formativo",
-    "programa de formación",
-    "programa de formacion",
-    "curso externo",
-    "bootcamp",
-    "ejercicio del curso",
-    "ejercicio de mi curso",
-)
+PATRONES_DATOS_SENSIBLES = config.PATRONES_DATOS_SENSIBLES
+PATRONES_PROGRAMA_EXTERNO = config.PATRONES_PROGRAMA_EXTERNO
 
 #---------------------------------------------------------------------------------------------------------------
 # Funciones
@@ -122,7 +81,6 @@ def validar_entrada(pregunta: str) -> tuple[bool, str | None]:
  
     return True, None
     
- 
  
 def validar_dia(dia: int) -> tuple[bool, str | None]:
     """Valida que el día de onboarding esté en rango 1-5.

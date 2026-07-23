@@ -21,7 +21,7 @@ from dataclasses import dataclass
 from google import genai
 from google.genai import types
 
-from config import MAX_TOKENS_INPUT, MODEL, TEMPERATURE
+from config import MAX_TOKENS_INPUT, MODEL, TEMPERATURE, RESPONSE_MIME_TYPE_JSON
 from gemini_auth import configurar_gemini_api_key
 
 configurar_gemini_api_key()
@@ -88,7 +88,7 @@ def llamar_gemini_json(
         contents=prompt,
         config=types.GenerateContentConfig(
             temperature=temperature,
-            response_mime_type="application/json",
+            response_mime_type=RESPONSE_MIME_TYPE_JSON,
         ),
     )
     return (response.text or "").strip(), _metricas_from_response(response, started)

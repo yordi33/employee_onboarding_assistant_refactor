@@ -32,6 +32,7 @@ import context
 import prompts
 import state
 import validators
+from config import STATUS_OK, STATUS_ERROR, CHECKLIST_SINTETICA_DIA_1
 from gemini_client import safe_generate
 
 
@@ -40,11 +41,11 @@ from gemini_client import safe_generate
 # ---------------------------------------------------------------------------
 
 def respuesta_ok(mensaje: str, data: dict | None = None) -> dict:
-    return {"status": "ok", "mensaje": mensaje, "data": data or {}}
+    return {"status": STATUS_OK, "mensaje": mensaje, "data": data or {}}
 
 
 def respuesta_error(mensaje: str, errores: list[str]) -> dict:
-    return {"status": "error", "mensaje": mensaje, "data": {"errores": errores}}
+    return {"status": STATUS_ERROR, "mensaje": mensaje, "data": {"errores": errores}}
 
 
 # ---------------------------------------------------------------------------
@@ -166,7 +167,7 @@ def _pregunta_sintetica_checklist(dia: int) -> str:
     primer_dia, checklist, engineering, sales...).
     """
     if dia == 1:
-        return "primer día bienvenida accesos slack"
+        return CHECKLIST_SINTETICA_DIA_1
     return f"día {dia} onboarding checklist tareas integración"
 
 
