@@ -1,13 +1,17 @@
 """main.py — Demos ejecutables (ejemplo de cómo usar la carga única de docs/faqs)."""
 
 import json
+from pathlib import Path
 
 import context
 import logic
 import state
+from config import NOMBRE_FILE_EMPLEADOS, NOMBRE_FILE_CASOS_TRAMPA
+
+DATA_DIR = Path(__file__).parent / "data"
 
 # Empleados de prueba
-with open("data/empleados_demo.json", encoding="utf-8") as f:
+with open(DATA_DIR / NOMBRE_FILE_EMPLEADOS, encoding="utf-8") as f:
     EMPLEADOS = {e["id"]: e for e in json.load(f)}
 
 # Carga ÚNICA de docs/faqs para toda la sesión de demos, evitando releer
@@ -53,7 +57,7 @@ def demo_3_comparativa_perfiles():
 def demo_4_vulnerable_vs_seguro():
     print("\n=== Demo 4: vulnerable vs seguro ( casos trampa ) ===")
     
-    with open("data/casos_trampa.json", encoding="utf-8") as f:
+    with open(DATA_DIR / NOMBRE_FILE_CASOS_TRAMPA, encoding="utf-8") as f:
         casos_trampa = json.load(f)
         
     empleado = EMPLEADOS["emp_01"]

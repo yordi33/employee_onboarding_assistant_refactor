@@ -23,14 +23,7 @@ Supuesto de interfaz con Track A (state.py):
     de clase. Si `state.py` usa otra forma, ajustar `build_history_block()`.
 """
 
-from config import MAX_TURNOS_HISTORIAL
-
-CONTACTOS = {
-    "rrhh": "rrhh@bridgesa.example",
-    "it": "it@bridgesa.example",
-    "people": "people@bridgesa.example",
-    "onboarding": "onboarding@bridgesa.example",
-}
+from config import MAX_TURNOS_HISTORIAL, CONTACTOS
 
 SYSTEM_PROMPT = f"""
 Eres el Employee Onboarding Assistant de Bridge SA. Acompañas a empleados

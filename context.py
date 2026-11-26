@@ -37,22 +37,23 @@ DOCS_PATH = DATA_DIR / "onboarding_docs.json"
 FAQ_PATH = DATA_DIR / "faq_onboarding.json"
 
 
-def cargar_documentos(ruta: Path = DOCS_PATH) -> list[dict]:
-    """Carga `onboarding_docs.json` desde disco."""
+def _cargar_json_lista(ruta: Path, nombre_archivo: str) -> list[dict]:
+    """Función auxiliar para evitar duplicar la lógica de lectura y validación de JSON."""
     with ruta.open(encoding="utf-8") as f:
         data = json.load(f)
     if not isinstance(data, list):
-        raise ValueError("onboarding_docs.json debe ser una lista de documentos")
+        raise ValueError(f"{nombre_archivo} debe ser una lista de elementos")
     return data
+
+
+def cargar_documentos(ruta: Path = DOCS_PATH) -> list[dict]:
+    """Carga `onboarding_docs.json` desde disco."""
+    return _cargar_json_lista(ruta, "onboarding_docs.json")
 
 
 def cargar_faq(ruta: Path = FAQ_PATH) -> list[dict]:
     """Carga `faq_onboarding.json` desde disco."""
-    with ruta.open(encoding="utf-8") as f:
-        data = json.load(f)
-    if not isinstance(data, list):
-        raise ValueError("faq_onboarding.json debe ser una lista de entradas")
-    return data
+    return _cargar_json_lista(ruta, "faq_onboarding.json")
 
 
 def _truncar(texto: str, max_chars: int = MAX_DOC_CHARS) -> str:

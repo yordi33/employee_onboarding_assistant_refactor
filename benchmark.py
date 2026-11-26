@@ -8,7 +8,7 @@ Qué hace este módulo:
   - Llama a cada modelo de `config.BENCHMARK_MODELS` con la MISMA
     temperatura (`config.TEMPERATURE`), reutilizando `gemini_client.safe_generate()`
     y `gemini_client.MetricasLlamada` (NO se duplican llamadas a la API
-    fuera de safe_generate).
+    fuas de safe_generate).
   - Los errores de API (p. ej. 429 por cuota) se capturan por fila sin
     detener la ejecución.
 
@@ -28,14 +28,17 @@ from datetime import datetime, timezone
 
 import context
 import prompts
-from config import BENCHMARK_DATA_PATH, BENCHMARK_MODELS, TEMPERATURE
+from config import (
+    BENCHMARK_DATA_PATH, 
+    BENCHMARK_MODELS, 
+    TEMPERATURE,
+    PAUSA_ENTRE_LLAMADAS_S,
+    EMPLEADO_ID_DEFAULT,
+    NOMBRE_FILE_EMPLEADOS
+)
 from gemini_client import MetricasLlamada, safe_generate
 
 DATA_DIR = BENCHMARK_DATA_PATH.parent
-
-# Nivel gratuito de Gemini: 5 peticiones/minuto por modelo. 13s de margen
-# entre llamadas evita 429 RESOURCE_EXHAUSTED sin tener que reintentar.
-PAUSA_ENTRE_LLAMADAS_S = 13
 
 
 @dataclass
@@ -65,7 +68,7 @@ def cargar_casos(ruta=BENCHMARK_DATA_PATH) -> list[dict]:
 
 
 def cargar_empleados() -> dict:
-    ruta = DATA_DIR / "empleados_demo.json"
+    ruta = DATA_DIR / NOMBRE_FILE_EMPLEADOS
     with ruta.open(encoding="utf-8") as f:
         empleados = json.load(f)
     return {e["id"]: e for e in empleados}
@@ -104,7 +107,7 @@ def ejecutar_benchmark() -> list[FilaBenchmark]:
 
     for caso in casos:
         caso_id = caso["id"]
-        empleado_id = caso.get("empleado_id", "emp_01")
+        empleado_id = caso.get("empleado_id", EMPLEADO_ID_DEFAULT)
         empleado = empleados.get(empleado_id)
         if empleado is None:
             print(f"AVISO: empleado {empleado_id!r} no encontrado, se omite caso {caso_id!r}")
@@ -151,7 +154,7 @@ def ejecutar_benchmark() -> list[FilaBenchmark]:
                         docs_usados=docs_usados,
                     )
                 )
-                print(f"OK  {caso_id} × {modelo} ({m.elapsed_ms} ms)")
+                print(f"OK   {caso_id} × {modelo} ({m.elapsed_ms} ms)")
             except Exception as exc:  # noqa: BLE001 — benchmark didáctico
                 filas.append(
                     FilaBenchmark(

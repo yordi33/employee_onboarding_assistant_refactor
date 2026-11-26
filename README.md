@@ -28,6 +28,7 @@ Arquitectura modular por responsabilidades, sin script monolítico. Cada fichero
 
 | Fichero | Responsabilidad |
 |---|---|
+| `config.py` | Centralización de constantes, límites, mensajes de error y rutas globales |
 | `gemini_auth.py` | Carga y validación de credenciales (`GEMINI_API_KEY`) |
 | `gemini_client.py` | Cliente del LLM: llamadas a la API, parámetros del modelo |
 | `context.py` | Selección de contexto: filtrado de docs/FAQ, truncado, historial acotado |
@@ -38,29 +39,9 @@ Arquitectura modular por responsabilidades, sin script monolítico. Cada fichero
 | `benchmark.py` | Ejecución del benchmark comparando modelos (Parte 4) |
 | `main.py` | Demos ejecutables de principio a fin |
 
-> _Completar según avance la Parte 2: detallar cómo se comunican entre sí estos módulos (p. ej. `logic.py` llama a `context.py` → `prompts.py` → `gemini_client.py`)._
+El flujo de ejecución está orquestado por `logic.py`. Cuando entra una solicitud, se valida primero en `validators.py`; si pasa la validación, `context.py` recupera los datos necesarios que luego se formatean en `prompts.py` para finalmente invocar al LLM mediante `gemini_client.py`.
 
-```
-.
-├── data/                     # Datos de partida (lore, docs, FAQ, empleados, casos trampa)
-├── docs/                     # Documentación adicional (política de escalado, etc.)
-│   └── politica-escalado.md
-├── entregables/               # Plantillas de entrega (matriz de decisión, rúbrica, recomendación)
-├── output/                    # Resultados del benchmark (CSV, informe) — Parte 4
-├── gemini_auth.py
-├── gemini_client.py
-├── context.py
-├── prompts.py
-├── validators.py
-├── logic.py
-├── state.py
-├── benchmark.py
-├── main.py                    # Demos ejecutables
-├── requirements.txt
-├── .env.example
-└── README.md
-```
-
+.├── data/                     # Datos de partida (lore, docs, FAQ, empleados, casos trampa)├── docs/                     # Documentación adicional (política de escalado, etc.)│   └── politica-escalado.md├── entregables/               # Plantillas de entrega (matriz de decisión, rúbrica, recomendación)├── output/                    # Resultados del benchmark (CSV, informe) — Parte 4├── config.py                  # Variables globales del sistema├── gemini_auth.py├── gemini_client.py├── context.py├── prompts.py├── validators.py├── logic.py├── state.py├── benchmark.py├── main.py                    # Demos ejecutables├── requirements.txt├── .env.example└── README.md
 ## ⚙️ Instalación y configuración
 
 ### Requisitos previos
@@ -72,7 +53,7 @@ Arquitectura modular por responsabilidades, sin script monolítico. Cada fichero
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/Mariamd30/employee_onboarding_assistant
+git clone [https://github.com/Mariamd30/employee_onboarding_assistant](https://github.com/Mariamd30/employee_onboarding_assistant)
 cd employee-onboarding-assistant
 
 # 2. Crear y activar entorno virtual
@@ -87,81 +68,8 @@ pip install -r requirements.txt
 # 4. Configurar variables de entorno
 cp .env.example .env
 # Editar .env y añadir vuestra GEMINI_API_KEY real
-```
+Nunca subáis vuestro .env con claves reales al repositorio. Está incluido en .gitignore.▶️ Ejecución de las demosBashpython main.py
+El script ejecuta de forma secuencial:Demo 1: conversación de 1 turno (empleado dev junior).Demo 2: checklist JSON para el día 1.Demo 3: mismo mensaje con empleado comercial vs remoto UE (respuestas distintas).Demo 4: comparación interactiva entre el modo vulnerable y seguro (casos trampa).🧠 Estrategia de selección de contextoEstrategia de recuperación de contexto:Máximo 3 documentos por turno.Máximo 2 FAQ por turno.Filtrado y priorización por departamento del empleado.Coincidencia y puntuación por palabras clave y tags relevantes.Historial limitado a los últimos 4 turnos de conversación.🔒 Robustez y seguridadPrincipio rector: fail-closed — si la validación de entrada falla, se rechaza la petición de inmediato sin consumir tokens ni llamar al modelo.El asistente SÍ ayuda con:Herramientas corporativas y primeros pasosCultura de Bridge SAVacaciones según documentaciónA quién contactar / cómo escalarEl asistente NO debe:Inventar políticas, plazos o cifras no documentadasResponder sobre salarios o datos de otros empleadosAtender a participantes externos de los programas formativosPara evaluar la seguridad, implementamos una comparativa ejecutable entre la lógica vulnerable y la lógica segura (fail-closed) utilizando el set de pruebas almacenado en data/casos_trampa.json. Puedes ver los detalles sobre la política de escalado acordada en docs/politica-escalado.md.📊 Benchmark y elección de modeloEl sistema incluye un motor de evaluación automatizado (benchmark.py) que compara el comportamiento y rendimiento de los modelos definidos. Al ejecutar las pruebas, los datos brutos se exportan en formato CSV y se genera un reporte resumido en Markdown dentro del directorio output/.Las decisiones de ingeniería resultantes y la justificación del modelo seleccionado están detalladas en los documentos de la carpeta entregables/.👥 EquipoDesarrollador/aMaría Muriel DelgadoJavier CorchadoYordanos Lopez DiazAlejandro Dietta Martin🔀 Flujo de trabajo del equipoRamas: main (estable) ← develop (integración) ← feature/* (trabajo individual)Commits siguiendo Conventional Commits (feat:, fix:, docs:, refactor:, chore:)Toda PR requiere al menos 1 revisión aprobada antes de mergearReparto de partes:ParteResponsableSetup + Parte 1 (contexto y datos)Alejandro Dietta / Maria MurielParte 2 · Track A — Cliente y estado (gemini_auth.py, gemini_client.py, state.py)Alejandro DiettaParte 2 · Track B — Contenido y reglas (context.py, prompts.py, validators.py)Maria MurielParte 2 · Integración (logic.py, main.py)Alejandro Dietta / Maria MurielParte 3 (robustez)Javier CorchadoParte 4 (benchmark)Maria Muriel
+---
 
-**Nunca subáis vuestro `.env` con claves reales al repositorio.** Está incluido en `.gitignore`.
-
-## ▶️ Ejecución de las demos
-
-```bash
-python main.py
-```
-
-El script ejecuta como mínimo:
-
-- **Demo 1**: conversación de 1 turno (empleado dev junior).
-- **Demo 2**: checklist JSON para el día 1.
-- **Demo 3**: mismo mensaje con empleado comercial vs remoto UE (respuestas distintas).
-
-## 🧠 Estrategia de selección de contexto
-
-Estrategia de recuperación de contexto
-
-- máximo 3 documentos
-- máximo 2 FAQ
-- filtrado por departamento
-- coincidencia por palabras clave
-- historial limitado a 4 turnos
-
-## 🔒 Robustez y seguridad
-
-Principio rector: **fail-closed** — si la validación de entrada falla, se rechaza la petición sin llamar al modelo.
-
-**El asistente SÍ ayuda con:**
-
-- Herramientas corporativas y primeros pasos
-- Cultura de Bridge SA
-- Vacaciones según documentación
-- A quién contactar / cómo escalar
-
-**El asistente NO debe:**
-
-- Inventar políticas, plazos o cifras no documentadas
-- Responder sobre salarios o datos de otros empleados
-- Atender a participantes externos de los programas formativos
-
-Ver [`docs/politica-escalado.md`](docs/politica-escalado.md) para el detalle de cuándo derivar a People, IT, manager/buddy o al buzón `onboarding@bridgesa.example`. **Esta política debe estar acordada por todo el equipo antes de implementar la lógica de la Parte 3.**
-
-> _Completar en la Parte 3_: comparativa vulnerable vs. seguro, y enlace a `data/casos_trampa.json` con los 5 casos trampa propios.
-
-## 📊 Benchmark y elección de modelo
-
-> _Completar en la Parte 4._ Resultados en `output/`, decisión justificada en `entregables/matriz_decision.md` y `entregables/recomendacion.md`.
-
-## 👥 Equipo
-
-| Desarrollador/a |
-|---|
-| María Muriel Delgado |
-| Javier Corchado |
-| Yordanos Lopez Diaz |
-| Alejandro Dietta Martin |
-
-## 🔀 Flujo de trabajo del equipo
-
-- Ramas: `main` (estable) ← `develop` (integración) ← `feature/*` (trabajo individual)
-- Commits siguiendo [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`)
-- Toda PR requiere al menos 1 revisión aprobada antes de mergear
-- Reparto de partes:
-
-| Parte | Responsable |
-|---|---|
-| Setup + Parte 1 (contexto y datos) | Alejandro Dietta / Maria Muriel |
-| Parte 2 · Track A — Cliente y estado (`gemini_auth.py`, `gemini_client.py`, `state.py`) | Alejandro Dietta |
-| Parte 2 · Track B — Contenido y reglas (`context.py`, `prompts.py`, `validators.py`) | Maria Muriel |
-| Parte 2 · Integración (`logic.py`, `main.py`) | Alejandro Dietta / Maria Muriel |
-| Parte 3 (robustez) | Javier Corchado |
-| Parte 4 (benchmark) | Maria Muriel |
-
-
-> Cada miembro lidera al menos una parte y revisa las PRs de las demás, cumpliendo la regla mínima de una PR revisada y mergeada por persona.
+Guarda los cambios en el `README.md` y ¡listo! Ya habremos terminado con los cambios en los archiv
